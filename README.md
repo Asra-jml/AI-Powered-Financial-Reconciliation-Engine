@@ -136,8 +136,5 @@ docker-compose up
 - **Zod** — runtime validation on all boundaries
 - **Claude API** (optional) — narration parsing fallback, temperature 0
 - **No LangGraph, no multi-agent, no vector DB, no Redis**
-- [METRICS.md](METRICS.md) — Full results including "where this does not win"
-
----
 
 **Track 04 — AI Finance Controller** | Razorpay AI Buildathon 2026
