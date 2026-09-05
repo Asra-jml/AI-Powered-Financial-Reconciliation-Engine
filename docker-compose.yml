@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  bahikhata:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/bahikhata.db
+      - ENGINE_VERSION=1.0.0
+    volumes:
+      - ./data:/app/data

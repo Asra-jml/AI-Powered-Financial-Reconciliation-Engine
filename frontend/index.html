@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Bahikhata — Settlement Integrity Engine. Three-way reconciliation for merchant payments.">
+  <title>Bahikhata — Settlement Integrity Engine</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-elevated: #ffffff;
+      --border: #e2e8f0;
+      --border-light: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      
+      --accent-red: #e11d48;
+      --accent-dark: #000000;
+      
+      --gradient-primary: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      --gradient-success: #000000; /* Replaced with solid black */
+      --gradient-danger: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+      
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-glow-red: 0 0 20px rgba(225, 29, 72, 0.2);
+      
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Ambient Background ─────────────────────────────────────── */
+    .ambient-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.03) 0%, transparent 70%);
+    }
+
+    /* ─── Layout ─────────────────────────────────────────────────── */
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────── */
+    header {
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.85);
+    }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: var(--gradient-primary);
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: white;
+      box-shadow: var(--shadow-glow-red);
+    }
+    .logo-text {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      font-weight: 500;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .badge-real { background: #000000; color: #ffffff; border: 1px solid #000000; }
+    .badge-test { background: #ffffff; color: #000000; border: 1px solid #000000; }
+    .badge-sim { background: rgba(225, 29, 72, 0.1); color: var(--accent-red); border: 1px solid rgba(225, 29, 72, 0.3); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .badge-real .badge-dot { background: #ffffff; }
+    .badge-test .badge-dot { background: #000000; }
+    .badge-sim .badge-dot { background: var(--accent-red); }
+
+    /* ─── Hero Section ───────────────────────────────────────────── */
+    .hero {
+      padding: 48px 0 32px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .hero h1 .highlight {
+      background: var(--gradient-danger);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-secondary);
+      max-width: 700px;
+      margin: 0 auto 32px;
+    }
+    .identity-equation {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 32px;
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--accent-red);
+      font-weight: 600;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 32px;
+    }
+
+    /* ─── Controls ────────────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+    .input-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 4px 4px 4px 16px;
+    }
+    .input-group label {
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    .input-group input {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      width: 90px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: var(--accent-blue); }
+    .btn {
+      padding: 10px 24px;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-primary {
+      background: var(--gradient-primary);
+      color: white;
+      box-shadow: var(--shadow-glow-red);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 25px rgba(225, 29, 72, 0.4);
+    }
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--bg-card-hover); }
+    
+    .btn-sim {
+      background: var(--bg-card);
+      color: var(--accent-red);
+      border: 1px solid rgba(225, 29, 72, 0.3);
+      box-shadow: 0 0 20px rgba(225, 29, 72, 0.15);
+    }
+    .btn-sim:hover {
+      background: var(--accent-red);
+      color: white;
+      box-shadow: 0 0 25px rgba(225, 29, 72, 0.4);
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+    .loading .spinner { display: inline-block; }
+    .loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Status Bar ─────────────────────────────────────────────── */
+    .status-bar {
+      text-align: center;
+      padding: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      display: none;
+    }
+    .status-bar.visible { display: block; }
+
+    /* ─── Grid Layout ────────────────────────────────────────────── */
+    .dashboard { display: none; }
+    .dashboard.visible { display: block; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    /* ─── Cards ───────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s;
+    }
+    .card:hover {
+      border-color: var(--border-light);
+      box-shadow: var(--shadow-md);
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .card-value {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+    }
+    .card-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+    .card-value.success { color: var(--accent-dark); }
+    .card-value.danger { color: var(--accent-red); }
+    .card-value.warning { color: var(--text-primary); }
+    .card-value.info { color: var(--text-primary); }
+
+    .stat-card {
+      text-align: center;
+      padding: 20px;
+    }
+    .stat-card .card-value { font-size: 28px; }
+
+    /* ─── Metric Card (small) ────────────────────────────────────── */
+    .metric-card {
+      padding: 16px 20px;
+    }
+    .metric-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 24px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ─── Waterfall Chart ────────────────────────────────────────── */
+    .waterfall-container {
+      padding: 32px;
+    }
+    .waterfall-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 16px;
+    }
+    .waterfall-label {
+      width: 160px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .waterfall-bar-container {
+      flex: 1;
+      height: 36px;
+      background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .waterfall-bar {
+      height: 100%;
+      border-radius: var(--radius-sm);
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      color: white;
+      white-space: nowrap;
+      min-width: fit-content;
+    }
+    .waterfall-bar.positive { background: var(--accent-dark); color: white; }
+    .waterfall-bar.negative { background: var(--accent-red); color: white; }
+    .waterfall-bar.neutral { background: var(--border-light); color: var(--text-primary); }
+    .waterfall-bar.danger { background: var(--accent-red); color: white; }
+    .waterfall-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0 8px 176px;
+    }
+
+    /* ─── Sections ────────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 48px;
+    }
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title .icon {
+      width: 32px; height: 32px;
+      border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+
+    /* ─── Exception Table ─────────────────────────────────────────── */
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg-secondary);
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(42,49,82,0.5);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    tbody tr:hover { background: var(--bg-card-hover); }
+    tbody td {
+      padding: 12px 16px;
+      color: var(--text-secondary);
+    }
+    .severity-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .severity-critical { color: var(--accent-red); }
+    .severity-high { color: var(--accent-red); }
+    .severity-medium { color: #000000; }
+    .severity-low { color: #64748b; }
+    .severity-info { color: #000000; }
+
+    .class-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: #000000;
+    }
+
+    /* ─── Baseline Comparison ─────────────────────────────────────── */
+    .comparison-table {
+      width: 100%;
+    }
+    .comparison-table th {
+      background: var(--bg-elevated);
+    }
+    .comparison-row-highlight td {
+      background: rgba(225, 29, 72, 0.05);
+      color: var(--text-primary) !important;
+      font-weight: 600;
+    }
+
+    /* ─── Exception Detail Modal ──────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      width: 90%;
+      max-width: 800px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      padding: 32px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .modal-close {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .modal-close:hover { background: var(--bg-elevated); color: var(--text-primary); }
+
+    .evidence-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+    .evidence-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      font-family: 'Inter', sans-serif;
+    }
+    .resolution-box {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    /* ─── Hash Badge ──────────────────────────────────────────────── */
+    .hash-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--accent-red);
+      font-weight: 600;
+    }
+
+    /* ─── Responsive ──────────────────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 32px; }
+      .grid-4 { grid-template-columns: 1fr; }
+      .header-inner { flex-direction: column; gap: 12px; }
+      .waterfall-label { width: 120px; font-size: 12px; }
+    }
+
+    /* ─── Footer ──────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 48px 0;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    footer a { color: var(--accent-blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg"></div>
+
+  <header>
+    <div class="container header-inner">
+      <div class="logo">
+        <div class="logo-icon">बह</div>
+        <div>
+          <div class="logo-text">Bahikhata</div>
+          <div class="logo-subtitle">Settlement Integrity Engine</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero -->
+    <section class="hero">
+      <h1>Find Every <span class="highlight">Missing Rupee</span></h1>
+      <p>Three-way reconciliation that proves, rupee by rupee, that what a merchant earned is what actually reached their bank — and names every rupee that didn't.</p>
+      <div class="identity-equation">
+        net_credited == Σ captured − Σ fees − Σ gst − Σ refunds − Σ adjustments ± tolerance
+      </div>
+
+      <!-- Controls -->
+      <div class="controls" style="flex-direction: column; gap: 24px;">
+        
+        <!-- Live Run Row -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; background: #fff5f5; padding: 16px; border-radius: var(--radius-lg); border: 1px solid #fecdd3; width: 100%; max-width: 600px;">
+          <div class="input-group" style="flex: 1;">
+            <label style="color: var(--accent-red); font-weight: 600; white-space: nowrap;">Bank CSV</label>
+            <input type="file" id="csv-upload" accept=".csv" style="width: 100%; padding: 4px; background: transparent; border: none; color: var(--text-primary);">
+          </div>
+          <button class="btn btn-primary" id="run-live-btn" onclick="runLiveReconciliation()" style="white-space: nowrap;">
+            <span class="spinner"></span>
+            <span class="btn-text">Run Live</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div class="status-bar" id="status-bar"></div>
+
+    <!-- Dashboard (hidden until run) -->
+    <div class="dashboard" id="dashboard">
+
+      <!-- KPI Cards -->
+      <section class="section">
+        <div class="grid-4">
+          <div class="card metric-card" id="kpi-unexplained">
+            <div class="metric-label">Unexplained</div>
+            <div class="metric-value danger">—</div>
+          </div>
+          <div class="card metric-card" id="kpi-match-rate">
+            <div class="metric-label">Match Rate (Value)</div>
+            <div class="metric-value success">—</div>
+          </div>
+          <div class="card metric-card" id="kpi-false-match">
+            <div class="metric-label">False Match Rate</div>
+            <div class="metric-value success">—</div>
+          </div>
+          <div class="card metric-card" id="kpi-exceptions">
+            <div class="metric-label">Exceptions</div>
+            <div class="metric-value warning">—</div>
+          </div>
+        </div>
+      </section>
+
+        <!-- Phase 2: Q&A Agent -->
+        <div class="card" style="margin-bottom: 2rem; background: #f1f5f9; border: 1px solid #cbd5e1;">
+          <div class="card-header">
+            <h2 class="card-title" style="color: #475569;">Ask the Agent</h2>
+          </div>
+          <div style="display: flex; gap: 1rem;">
+            <input type="text" id="qa-input" placeholder="e.g. 'why was settlement_id light?' or 'find fee variances above ₹100'" style="flex: 1; padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid #94a3b8; background: #ffffff; color: #0f172a; font-family: inherit;" onkeydown="if(event.key === 'Enter') askAgent()">
+            <button class="btn btn-primary" onclick="askAgent()">Ask</button>
+          </div>
+          <div id="qa-result" style="margin-top: 1rem; padding: 1rem; background: #ffffff; border-radius: var(--radius-md); border: 1px solid #cbd5e1; display: none; white-space: pre-wrap; font-family: monospace; color: #334155;"></div>
+        </div>
+
+        <!-- Waterfall -->
+      <section class="section">
+        <h2 class="section-title">
+          Settlement Waterfall
+        </h2>
+        <div class="card waterfall-container" id="waterfall-chart">
+          <div class="waterfall-row">
+            <span class="waterfall-label">Gross Captures</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar positive" id="bar-gross" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">− Fees</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar negative" id="bar-fees" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">− GST</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar negative" id="bar-gst" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">− Refunds</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar negative" id="bar-refunds" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">− Adjustments</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar negative" id="bar-adjustments" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-divider"></div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">Expected Net</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar neutral" id="bar-expected" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-row">
+            <span class="waterfall-label">Actual Credited</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar neutral" id="bar-actual" style="width:0%"></div>
+            </div>
+          </div>
+          <div class="waterfall-divider"></div>
+          <div class="waterfall-row">
+            <span class="waterfall-label" style="font-weight:700;color:var(--accent-rose)">▸ UNEXPLAINED</span>
+            <div class="waterfall-bar-container">
+              <div class="waterfall-bar danger" id="bar-unexplained" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Metrics Comparison -->
+      <section class="section">
+        <h2 class="section-title">
+          Metrics vs Baselines
+        </h2>
+        <div class="grid-2">
+          <div class="card">
+            <div class="table-container">
+              <table class="comparison-table" id="comparison-table">
+                <thead>
+                  <tr>
+                    <th>Method</th>
+                    <th>Match (Count)</th>
+                    <th>Match (Value)</th>
+                    <th>False Match</th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-body"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;">
+            <div class="metric-label">Determinism Hash</div>
+            <div class="hash-badge" id="determinism-hash" style="margin:12px 0">—</div>
+            <div class="metric-label" style="margin-top:16px">Throughput</div>
+            <div class="metric-value info" id="throughput-value" style="font-size:28px">—</div>
+            <div class="card-subtitle">records/sec</div>
+            <div class="metric-label" style="margin-top:16px">% of Oracle</div>
+            <div class="metric-value success" id="oracle-pct" style="font-size:28px">—</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exception Queue -->
+      <section class="section">
+        <h2 class="section-title">
+          Exception Queue
+        </h2>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th>
+                  <th>Severity</th>
+                  <th>Amount (₹)</th>
+                  <th>Explanation</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="exception-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exception Precision/Recall -->
+      <section class="section">
+        <h2 class="section-title">
+          Exception Detection Accuracy
+        </h2>
+        <div class="card">
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Exception Class</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1 Score</th>
+                </tr>
+              </thead>
+              <tbody id="precision-recall-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Exception Detail Modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3 id="modal-title" style="font-size:20px;font-weight:700;margin-bottom:4px">—</h3>
+          <div id="modal-subtitle" style="font-size:13px;color:var(--text-secondary)">—</div>
+        </div>
+        <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('visible')">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>Bahikhata — Settlement Integrity Engine | Track 04: AI Finance Controller | Razorpay AI Buildathon 2026</p>
+      <p style="margin-top:8px">The LLM never decides a match. No money was moved. All data is simulated. <a href="#">View Source</a></p>
+    </div>
+  </footer>
+
+  <script>
+    // ─── State ──────────────────────────────────────────────────────
+    let currentData = null;
+    let currentRunId = null;
+
+    function formatPaise(paise) {
+      const rupees = Math.abs(paise) / 100;
+      if (rupees >= 100000) return '₹' + (rupees / 100000).toFixed(2) + 'L';
+      return '₹' + rupees.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+    }
+
+    function pct(n) {
+      return (n * 100).toFixed(2) + '%';
+    }
+
+    // ─── Run Reconciliation ─────────────────────────────────────────
+    async function runReconciliation() {
+      const seed = parseInt(document.getElementById('seed-input').value) || 42;
+      const records = parseInt(document.getElementById('records-input').value) || 500;
+      const btn = document.getElementById('run-btn');
+      const statusBar = document.getElementById('status-bar');
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+      statusBar.textContent = 'Generating data and running reconciliation pipeline...';
+      statusBar.classList.add('visible');
+
+      try {
+        const res = await fetch('/api/runs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ seed, records }),
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.reason || 'Run failed');
+
+        currentData = data;
+        currentRunId = data.run_id;
+        statusBar.textContent = `Completed in ${(data.elapsed_ms / 1000).toFixed(2)}s — ${records} records processed`;
+        renderDashboard(data);
+      } catch (err) {
+        statusBar.textContent = 'Error: ' + err.message;
+        statusBar.style.color = 'var(--accent-red)';
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    // ─── Run Live Reconciliation ────────────────────────────────────
+    async function runLiveReconciliation() {
+      const fileInput = document.getElementById('csv-upload');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Please select a bank statement CSV file first!");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append('statement', file);
+
+      const btn = document.getElementById('run-live-btn');
+      const statusBar = document.getElementById('status-bar');
+
+      btn.classList.add('loading');
+      btn.disabled = true;
+      statusBar.textContent = 'Syncing Razorpay and Parsing CSV with Gemini...';
+      statusBar.classList.add('visible');
+      statusBar.style.color = 'var(--text-muted)';
+
+      try {
+        const res = await fetch('/api/recon/live', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!data.success) throw new Error(data.reason || 'Live run failed');
+
+        currentData = data;
+        currentRunId = data.run_id;
+        statusBar.textContent = `Live Recon Completed in ${(data.elapsed_ms / 1000).toFixed(2)}s`;
+        renderDashboard(data);
+      } catch (err) {
+        statusBar.textContent = 'Error: ' + err.message;
+        statusBar.style.color = 'var(--accent-red)';
+      } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+      }
+    }
+
+    // ─── Q&A Agent ──────────────────────────────────────────────────
+    async function askAgent() {
+      const input = document.getElementById('qa-input');
+      const resultDiv = document.getElementById('qa-result');
+      const query = input.value;
+      if (!query || !currentRunId) return;
+
+      resultDiv.style.display = 'block';
+      resultDiv.textContent = 'Analyzing...';
+
+      try {
+        const res = await fetch(`/api/runs/${currentRunId}/ask`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query }),
+        });
+        const data = await res.json();
+        resultDiv.textContent = data.answer;
+      } catch (e) {
+        resultDiv.textContent = 'Error: Could not reach agent.';
+      }
+    }
+
+    // ─── Render Dashboard ───────────────────────────────────────────
+    function renderDashboard(data) {
+      const dashboard = document.getElementById('dashboard');
+      dashboard.classList.add('visible');
+
+      const w = data.waterfall;
+      const m = data.metrics;
+
+      // KPIs
+      document.querySelector('#kpi-unexplained .metric-value').textContent = formatPaise(w.unexplained_paise);
+      document.querySelector('#kpi-match-rate .metric-value').textContent = pct(m.match_rate_by_value);
+      document.querySelector('#kpi-false-match .metric-value').textContent = pct(m.false_match_rate);
+
+      const exTotal = Object.values(data.exceptions).reduce((a, b) => a + b, 0);
+      document.querySelector('#kpi-exceptions .metric-value').textContent = exTotal;
+
+      // False match coloring
+      const fmEl = document.querySelector('#kpi-false-match .metric-value');
+      fmEl.className = 'metric-value ' + (m.false_match_rate === 0 ? 'success' : 'danger');
+
+      // Waterfall bars
+      const maxVal = w.gross_captures_paise;
+      const barData = [
+        ['bar-gross', w.gross_captures_paise],
+        ['bar-fees', w.total_fees_paise],
+        ['bar-gst', w.total_gst_paise],
+        ['bar-refunds', w.total_refunds_paise],
+        ['bar-adjustments', w.total_adjustments_paise],
+        ['bar-expected', w.expected_net_paise],
+        ['bar-actual', w.actual_credited_paise],
+        ['bar-unexplained', w.unexplained_paise],
+      ];
+
+      setTimeout(() => {
+        for (const [id, val] of barData) {
+          const el = document.getElementById(id);
+          const pctWidth = Math.max(2, (Math.abs(val) / maxVal) * 100);
+          el.style.width = pctWidth + '%';
+          el.textContent = formatPaise(val);
+        }
+      }, 100);
+
+      // Comparison table
+      const compBody = document.getElementById('comparison-body');
+      const rows = [
+        { name: 'Bahikhata', mc: m.match_rate_by_count, mv: m.match_rate_by_value, fm: m.false_match_rate, highlight: true },
+        { name: data.baselines.naive.name, mc: data.baselines.naive.matchRateByCount, mv: data.baselines.naive.matchRateByValue, fm: data.baselines.naive.falseMatchRate },
+        { name: data.baselines.oracle.name, mc: data.baselines.oracle.matchRateByCount, mv: data.baselines.oracle.matchRateByValue, fm: data.baselines.oracle.falseMatchRate },
+      ];
+      compBody.innerHTML = rows.map(r => `
+        <tr class="${r.highlight ? 'comparison-row-highlight' : ''}">
+          <td style="font-weight:${r.highlight ? '700' : '400'}">${r.name}</td>
+          <td>${pct(r.mc)}</td>
+          <td>${pct(r.mv)}</td>
+          <td style="color:${r.fm === 0 ? 'var(--accent-dark)' : 'var(--accent-red)'};font-weight:700">${pct(r.fm)}</td>
+        </tr>
+      `).join('');
+
+      // Metrics sidebar
+      document.getElementById('determinism-hash').textContent = m.determinism_hash.slice(0, 24) + '...';
+      document.getElementById('throughput-value').textContent = m.throughput_records_per_sec;
+      document.getElementById('oracle-pct').textContent = pct(m.percent_of_oracle);
+
+      // Exception queue — fetch from API
+      fetchExceptions(data.run_id);
+
+      // Precision/Recall table
+      renderPrecisionRecall(m);
+    }
+
+    // ─── Fetch Exceptions ───────────────────────────────────────────
+    async function fetchExceptions(runId) {
+      try {
+        const res = await fetch(`/api/runs/${runId}/exceptions`);
+        const data = await res.json();
+        renderExceptions(data.exceptions, runId);
+      } catch (err) {
+        console.error('Failed to fetch exceptions:', err);
+      }
+    }
+
+    function renderExceptions(exceptions, runId) {
+      const body = document.getElementById('exception-body');
+      body.innerHTML = exceptions.slice(0, 50).map((e, i) => `
+        <tr onclick="showExceptionDetail('${runId}', '${e.exception_id}')">
+          <td><span class="class-tag">${e.class}</span></td>
+          <td><span class="severity-badge severity-${e.severity}">${e.severity}</span></td>
+          <td style="font-family:'JetBrains Mono';font-weight:600">${formatPaise(e.amount_paise)}</td>
+          <td style="max-width:400px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.explanation_text || '—'}</td>
+          <td><span class="severity-badge ${e.resolved_by === 'unresolved' ? 'severity-high' : 'severity-info'}">${e.resolved_by}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── Precision/Recall ───────────────────────────────────────────
+    function renderPrecisionRecall(metrics) {
+      const body = document.getElementById('precision-recall-body');
+      const classes = Object.keys(metrics.exception_precision || {});
+      body.innerHTML = classes.map(cls => {
+        const p = metrics.exception_precision[cls] || 0;
+        const r = metrics.exception_recall[cls] || 0;
+        const f = metrics.exception_f1[cls] || 0;
+        return `
+          <tr>
+            <td><span class="class-tag">${cls}</span></td>
+            <td style="font-family:'JetBrains Mono'">${pct(p)}</td>
+            <td style="font-family:'JetBrains Mono'">${pct(r)}</td>
+            <td style="font-family:'JetBrains Mono';font-weight:600;color:${f >= 0.8 ? 'var(--accent-dark)' : f >= 0.5 ? 'var(--text-secondary)' : 'var(--accent-red)'}">${pct(f)}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // ─── Exception Detail Modal ─────────────────────────────────────
+    async function showExceptionDetail(runId, exceptionId) {
+      try {
+        const res = await fetch(`/api/runs/${runId}/exceptions/${exceptionId}`);
+        const data = await res.json();
+        const e = data.exception;
+
+        document.getElementById('modal-title').textContent = e.class;
+        document.getElementById('modal-subtitle').innerHTML = `
+          <span class="severity-badge severity-${e.severity}">${e.severity}</span>
+          &nbsp; Amount: <strong>${formatPaise(e.amount_paise)}</strong>
+        `;
+
+        let body = `
+          <div class="evidence-label">Explanation</div>
+          <p style="color:var(--text-secondary);margin-bottom:16px">${e.explanation_text}</p>
+
+          <div class="evidence-label">Evidence</div>
+          <div class="evidence-block"><pre style="white-space:pre-wrap;color:var(--accent-cyan)">${JSON.stringify(e.evidence, null, 2)}</pre></div>
+        `;
+
+        if (data.related_lines && data.related_lines.length > 0) {
+          body += `<div class="evidence-label">Related Ledger Lines</div>
+          <div class="evidence-block"><pre style="white-space:pre-wrap;color:var(--text-secondary)">${JSON.stringify(data.related_lines.map(l => ({
+            source: l.source,
+            amount: formatPaise(l.amount_paise),
+            date: l.occurred_on,
+            instrument: l.instrument,
+            narration: l.narration_raw?.slice(0, 60),
+          })), null, 2)}</pre></div>`;
+        }
+
+        body += `
+          <div class="resolution-box">
+            <div class="evidence-label" style="color:var(--accent-dark)">Proposed Resolution</div>
+            <p style="color:var(--text-secondary);font-size:13px">${e.proposed_resolution}</p>
+            ${e.resolved_by === 'unresolved' ? `
+              <button class="btn btn-primary" style="margin-top:12px" onclick="resolveException('${runId}', '${e.exception_id}')">
+                Resolve Manually
+              </button>
+            ` : `<p style="color:var(--accent-dark);margin-top:8px;font-weight:600">Resolved by ${e.resolved_by}</p>`}
+          </div>
+        `;
+
+        document.getElementById('modal-body').innerHTML = body;
+        document.getElementById('modal-overlay').classList.add('visible');
+      } catch (err) {
+        console.error('Failed to fetch exception detail:', err);
+      }
+    }
+
+    async function resolveException(runId, exceptionId) {
+      try {
+        await fetch(`/api/runs/${runId}/exceptions/${exceptionId}/resolve`, { method: 'POST' });
+        showExceptionDetail(runId, exceptionId); // Refresh
+        fetchExceptions(runId); // Refresh table
+      } catch (err) {
+        console.error('Failed to resolve:', err);
+      }
+    }
+
+    function closeModal(event) {
+      if (event.target === document.getElementById('modal-overlay')) {
+        document.getElementById('modal-overlay').classList.remove('visible');
+      }
+    }
+
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('modal-overlay').classList.remove('visible');
+      }
+    });
+  </script>
+</body>
+</html>
