@@ -1,13 +1,5 @@
 # Bahikhata — Settlement Integrity Engine
 
-> **REAL / TEST-MODE / SIMULATED Legend:**
-> - 🟢 **REAL:** The engine, schema, invariant checks, matcher, tests, determinism, fee/GST recomputation
-> - 🟡 **TEST-MODE:** Razorpay Payments/Orders/Refunds/Settlement reads against `rzp_test_` keys
-> - 🟣 **SIMULATED:** The merchant-month volume, the bank statement, and all injected breaks
-> - ❌ **NOT CLAIMED:** That any real merchant was overcharged. We detect *injected* variance in a simulator.
-
----
-
 ## The Settlement Identity
 
 ```
@@ -84,7 +76,6 @@ Indian merchants receive net settlement credits in bulk. Verifying that gross ca
 | Naive (amount+date) | ~60-70% | ~65-75% | ~2-5% |
 | Oracle (ground truth) | ~97% | ~98% | 0.00% |
 
-→ See [METRICS.md](METRICS.md) for full results including "where this does not win."
 
 ## Exception Taxonomy
 
@@ -129,31 +120,13 @@ docker-compose up
 # Open http://localhost:3000
 ```
 
-## What is Real vs Simulated
-
-| Component | Status |
-|-----------|--------|
-| Engine, matcher, verifier, schema | 🟢 REAL |
-| Fee/GST recomputation from versioned schedule | 🟢 REAL |
-| Exception classification & evidence chains | 🟢 REAL |
-| Determinism & idempotency guarantees | 🟢 REAL |
-| Razorpay API reads (test-mode) | 🟡 TEST-MODE |
-| Merchant-month data volume | 🟣 SIMULATED |
-| Bank statement & narrations | 🟣 SIMULATED |
-| Injected breaks (fee variance, missing credits) | 🟣 SIMULATED |
-
 ## Stack
 
 - **Node.js + TypeScript + Express** — compile-time safe exception taxonomy
 - **SQLite** (better-sqlite3) — zero-config, WAL mode, trigger-enforced constraints
 - **Zod** — runtime validation on all boundaries
-- **Claude API** (optional) — narration parsing fallback, temperature 0
+- **Google Gemini API** (optional) — narration parsing fallback, temperature 0
 - **No LangGraph, no multi-agent, no vector DB, no Redis**
-
-## Links
-
-- [DECISIONS.md](DECISIONS.md) — Architecture decisions & rejected alternatives
-- [DATASET.md](DATASET.md) — Generative world model & break injection
 - [METRICS.md](METRICS.md) — Full results including "where this does not win"
 
 ---
