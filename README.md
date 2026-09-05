@@ -1,13 +1,5 @@
 # Bahikhata — Settlement Integrity Engine
 
-> **REAL / TEST-MODE / SIMULATED Legend:**
-> - 🟢 **REAL:** The engine, schema, invariant checks, matcher, tests, determinism, fee/GST recomputation
-> - 🟡 **TEST-MODE:** Razorpay Payments/Orders/Refunds/Settlement reads against `rzp_test_` keys
-> - 🟣 **SIMULATED:** The merchant-month volume, the bank statement, and all injected breaks
-> - ❌ **NOT CLAIMED:** That any real merchant was overcharged. We detect *injected* variance in a simulator.
-
----
-
 ## The Settlement Identity
 
 ```
@@ -18,10 +10,6 @@ net_credited  ==  Σ captured_amount
                 − Σ adjustments (disputes, chargebacks, reversals)
                 ± rounding_tolerance
 ```
-
-Every reconciliation either satisfies this identity or produces a typed exception explaining which term is wrong. This single equation is the architecture, the test suite, and the pitch.
-
----
 
 ## The Problem
 
@@ -84,7 +72,6 @@ Indian merchants receive net settlement credits in bulk. Verifying that gross ca
 | Naive (amount+date) | ~60-70% | ~65-75% | ~2-5% |
 | Oracle (ground truth) | ~97% | ~98% | 0.00% |
 
-→ See [METRICS.md](METRICS.md) for full results including "where this does not win."
 
 ## Exception Taxonomy
 
@@ -150,10 +137,6 @@ docker-compose up
 - **Claude API** (optional) — narration parsing fallback, temperature 0
 - **No LangGraph, no multi-agent, no vector DB, no Redis**
 
-## Links
-
-- [DECISIONS.md](DECISIONS.md) — Architecture decisions & rejected alternatives
-- [DATASET.md](DATASET.md) — Generative world model & break injection
 - [METRICS.md](METRICS.md) — Full results including "where this does not win"
 
 ---
